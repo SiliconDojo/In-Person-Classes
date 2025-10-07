@@ -1,0 +1,10 @@
+This is the conversation we have had up until now.
+
+Me: who was president in 1980
+You: Ronald Reagan was president in 1980.
+Me: how old was he at the time
+You: He was 69.
+Me: who was he married to?
+You: He was married to Nancy Reagan.
+Me: how old was she at the time
+You: She was 59.
