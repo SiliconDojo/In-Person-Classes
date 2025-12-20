@@ -1,7 +1,7 @@
 import moondream as md
 from PIL import Image
 
-key ='YOUR API KEY'
+key = "YOUR API KEY"
 
 model = md.vl(api_key=key)
 

@@ -9,4 +9,3 @@ for snippet in fetched_transcript:
     print(snippet)
     # print(snippet.text)
     # print(f'{snippet.start} -- {snippet.text}')
-

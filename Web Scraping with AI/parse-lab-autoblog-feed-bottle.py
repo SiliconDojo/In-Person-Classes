@@ -1,11 +1,14 @@
-from bottle import run, route, post, request, static_file
 import sqlite3
 
-class db():
+from bottle import post, request, route, run, static_file
+
+
+class db:
     def create():
         conn = sqlite3.connect("autoblog.db")
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS blog (
             title,
             url,
@@ -13,31 +16,32 @@ class db():
             title_ai,
             post_ai
         );
-        """)
+        """
+        )
         conn.commit()
         conn.close()
-    
-    def new(title,url):
+
+    def new(title, url):
         conn = sqlite3.connect("autoblog.db")
         cursor = conn.cursor()
-        sql = 'insert into blog(title, url) values(?,?)'
-        cursor.execute(sql,(title, url))
+        sql = "insert into blog(title, url) values(?,?)"
+        cursor.execute(sql, (title, url))
         conn.commit()
-        conn.close() 
+        conn.close()
 
     def find(query):
         conn = sqlite3.connect("autoblog.db")
         cursor = conn.cursor()
-        sql = 'select * from blog where post_ai like ? order by rowid desc'
-        result = cursor.execute(sql,(f'%{query}%',))
+        sql = "select * from blog where post_ai like ? order by rowid desc"
+        result = cursor.execute(sql, (f"%{query}%",))
         result = result.fetchall()
         conn.close()
         return result
-    
+
     def index():
         conn = sqlite3.connect("autoblog.db")
         cursor = conn.cursor()
-        sql = 'select * from blog where post_ai IS NULL'
+        sql = "select * from blog where post_ai IS NULL"
         result = cursor.execute(sql)
         result = result.fetchall()
         conn.close()
@@ -47,34 +51,35 @@ class db():
     def update_original(url, text, text_ai, title_ai):
         conn = sqlite3.connect("autoblog.db")
         cursor = conn.cursor()
-        sql = '''
+        sql = """
             update blog set post_original = ?,
             post_ai = ?,
             title_ai = ?
             where url = ?
-            '''
-        cursor.execute(sql,(text,text_ai,title_ai,url))
+            """
+        cursor.execute(sql, (text, text_ai, title_ai, url))
         conn.commit()
-        conn.close() 
- 
-@route('/', method=['GET','POST'])
+        conn.close()
+
+
+@route("/", method=["GET", "POST"])
 def index():
-    query = request.forms.get('query')
+    query = request.forms.get("query")
     if not query:
-        query=''
+        query = ""
 
     response = db.find(query)
-    posts = ''
+    posts = ""
     for item in response:
-        lines = item[4].split('\n')
-        text=''
+        lines = item[4].split("\n")
+        text = ""
         for line in lines:
-            text+=f'<p>{line}</p>'
-        posts += f'''
+            text += f"<p>{line}</p>"
+        posts += f"""
                     <h1>{item[3]}</h1>
                     <p>{text}</p>
-                    '''
-    page = f'''
+                    """
+    page = f"""
             <h1>Web App</h1>
             <form action="/" method="post">
                 Search: <input type="text" name="query">
@@ -83,11 +88,13 @@ def index():
             </form>
             <strong>{query}</strong><br>
             {posts}
-            '''
+            """
     return page
 
-@route('/pic/<filename:path>')
-def serve_static(filename):
-    return static_file(filename, root='./pic')
 
-run(host='localhost', port=8080)
+@route("/pic/<filename:path>")
+def serve_static(filename):
+    return static_file(filename, root="./pic")
+
+
+run(host="localhost", port=8080)

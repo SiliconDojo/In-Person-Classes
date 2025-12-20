@@ -1,4 +1,5 @@
 import base64
+
 import requests
 
 with open("picture.png", "rb") as f:
@@ -9,4 +10,4 @@ payload = {
 }
 
 resp = requests.post("http://localhost:2021/v1/caption", json=payload).json()
-print(resp['caption'])
+print(resp["caption"])
