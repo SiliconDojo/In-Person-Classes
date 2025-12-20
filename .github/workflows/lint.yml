@@ -1,0 +1,62 @@
+name: Python Linting and Quality Checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Check code formatting with Black
+        run: black --check .
+        continue-on-error: true
+
+      - name: Check import sorting with isort
+        run: isort --check-only .
+        continue-on-error: true
+
+      - name: Lint with flake8
+        run: flake8 .
+        continue-on-error: true
+
+      - name: Lint with pylint
+        run: |
+          find . -type f -name "*.py" -not -path "./.*" -not -path "./.venv/*" | xargs pylint --exit-zero --disable=fixme
+        continue-on-error: true
+
+      - name: Type check with mypy
+        run: mypy .
+        continue-on-error: true
+
+      - name: Run tests with pytest
+        run: pytest --cov=. --cov-report=xml --cov-report=term-missing
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
