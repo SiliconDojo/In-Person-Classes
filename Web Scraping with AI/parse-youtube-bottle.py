@@ -1,36 +1,42 @@
+from bottle import post, request, route, run
 from ollama import ChatResponse, chat
-from bottle import run, route, post, request
 from youtube_transcript_api import YouTubeTranscriptApi
 
+
 def ai(transcript, query):
-    response: ChatResponse = chat(model='gpt-oss', messages=[
-        {
-        'role': 'user',
-        'content': f'''
+    response: ChatResponse = chat(
+        model="gpt-oss",
+        messages=[
+            {
+                "role": "user",
+                "content": f"""
             Answer this question: {query}
             About this transcript of a Youtube Video: {transcript}.
-            ''',
-        },
-    ])
+            """,
+            },
+        ],
+    )
     return response.message.content
 
+
 def scrape(url):
-    url = url.split('=')
+    url = url.split("=")
     video_id = url[1]
 
     ytt_api = YouTubeTranscriptApi()
     transcript = ytt_api.fetch(video_id)
 
-    transcript_clean=''
+    transcript_clean = ""
     for snippet in transcript:
-        transcript_clean+= f'Start Time: {snippet.start} Text: {snippet.text}<br>'
+        transcript_clean += f"Start Time: {snippet.start} Text: {snippet.text}<br>"
 
     return transcript_clean
 
+
 def embed(url):
-    url = url.split('=')
+    url = url.split("=")
     video_id = url[1]
-    embed = f'''
+    embed = f"""
         <iframe width="560" height="315"
             src="https://www.youtube.com/embed/{video_id}"
             title="YouTube video player"
@@ -39,31 +45,31 @@ def embed(url):
             allowfullscreen>
         </iframe>
         <br>
-    '''
+    """
     return embed
 
-@route('/', method=['GET','POST'])
-def index():
-    query = request.forms.get('query')
-    if not query:
-        query=''
 
-    url = request.forms.get('url')
+@route("/", method=["GET", "POST"])
+def index():
+    query = request.forms.get("query")
+    if not query:
+        query = ""
+
+    url = request.forms.get("url")
     if not url:
-        url=''
-        transcript=''
+        url = ""
+        transcript = ""
     else:
         transcript = scrape(url)
-    
-    if url !='' and transcript !='':
+
+    if url != "" and transcript != "":
         response = ai(transcript, query)
         youtube_embed = embed(url)
     else:
-        response = '*****'
-        youtube_embed = '*****'
+        response = "*****"
+        youtube_embed = "*****"
 
-   
-    page = f'''
+    page = f"""
             <h1>Web App</h1>
             <form action="/" method="post">
                 Video: <input type="text" name="url" value="{url}">
@@ -75,7 +81,8 @@ def index():
             <strong>{query}</strong><br>
             <p>{response}</p>
             {transcript}
-            '''
+            """
     return page
 
-run(host='localhost', port=8080)
+
+run(host="localhost", port=8080)

@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-key = 'YOUR API KEY'
+key = "YOUR API KEY"
 
 client = OpenAI(api_key=key)
 
@@ -10,10 +10,10 @@ transcript = client.audio.transcriptions.create(
     file=audio_file,
     model="whisper-1",
     response_format="verbose_json",
-    timestamp_granularities=["segment"]
+    timestamp_granularities=["segment"],
 )
 print(transcript)
-print('****')
+print("****")
 
 for segment in transcript.segments:
     start = segment.start

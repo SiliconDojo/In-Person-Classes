@@ -1,65 +1,74 @@
-from ollama import chat
-from ollama import ChatResponse
 import sqlite3
 
-injection = 'Answer in under 10 words'
+from ollama import ChatResponse, chat
+
+injection = "Answer in under 10 words"
+
 
 class db:
     def create():
         conn = sqlite3.connect("ai-class.db")
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS thread (
             query,
             response,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-        """)
+        """
+        )
 
         conn.commit()
         conn.close()
 
-    def insert(query,response):
+    def insert(query, response):
         conn = sqlite3.connect("ai-class.db")
         cursor = conn.cursor()
-        sql = 'insert into thread(query,response) values(?,?)'
-        cursor.execute(sql,(query,response))
+        sql = "insert into thread(query,response) values(?,?)"
+        cursor.execute(sql, (query, response))
         conn.commit()
-        conn.close() 
-    
+        conn.close()
+
     def select():
         conn = sqlite3.connect("ai-class.db")
         cursor = conn.cursor()
-        sql = 'select * from thread'
+        sql = "select * from thread"
         cursor.execute(sql)
         result = cursor.fetchall()
         conn.close()
         return result
-       
+
+
 def report():
-  response = db.select()
-  with open('ai-report.html', 'w') as file:
-      for line in response:
-        file.write(f'<p>{line}</p>')
+    response = db.select()
+    with open("ai-report.html", "w") as file:
+        for line in response:
+            file.write(f"<p>{line}</p>")
+
 
 def ai(query):
-  response: ChatResponse = chat(model='phi3', messages=[
-    {
-      'role': 'user',
-      'content': query,
-    },
-  ])
+    response: ChatResponse = chat(
+        model="phi3",
+        messages=[
+            {
+                "role": "user",
+                "content": query,
+            },
+        ],
+    )
 
-  return response.message.content
+    return response.message.content
+
 
 db.create()
 
 while True:
-  query = input('How Can I Help: ')
-  query= f'{injection} -- {query}'
-  response = ai(query)
-  db.insert(query, response)
-  report()
-  print(query)
-  print(response)
-  print('-----')
+    query = input("How Can I Help: ")
+    query = f"{injection} -- {query}"
+    response = ai(query)
+    db.insert(query, response)
+    report()
+    print(query)
+    print(response)
+    print("-----")

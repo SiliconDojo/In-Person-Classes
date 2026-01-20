@@ -1,7 +1,9 @@
 import requests
 import tiktoken
 
-page = requests.get('https://arstechnica.com/space/2025/11/nasa-is-kind-of-a-mess-here-are-the-top-priorities-for-a-new-administrator/').text
+page = requests.get(
+    "https://arstechnica.com/space/2025/11/nasa-is-kind-of-a-mess-here-are-the-top-priorities-for-a-new-administrator/"
+).text
 
 print(page)
 
